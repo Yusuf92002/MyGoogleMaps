@@ -13,12 +13,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-   # A Flutter plugin for integrating Google Maps in iOS and Android applications.
-   google_maps_flutter: ^2.9.0 
-   # Cross-platform plugin for easy access to device's location in real-time.
-   location: ^7.0.0
-   # A flutter package to get polyline points by either passing the coordinates or google encoded polyline string
-   flutter_polyline_points: ^2.1.0
+  # A Flutter plugin for integrating Google Maps in iOS and Android applications.
+  google_maps_flutter: ^2.9.0 
+  # Cross-platform plugin for easy access to device's location in real-time.
+  location: ^7.0.0
+  # A flutter package to get polyline points by either passing the coordinates or google encoded polyline string
+  flutter_polyline_points: ^2.1.0
 
   cupertino_icons: ^1.0.8
 
