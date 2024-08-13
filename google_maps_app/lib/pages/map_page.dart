@@ -10,12 +10,24 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   // Alexandria, Egypt
-  static const LatLng _pGooglePlex = LatLng(31.2156, 29.9553);
+  static const LatLng _alexandria = LatLng(31.2156, 29.9553);
+  static const LatLng _mansoura = LatLng(31.0419, 31.3785);
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: GoogleMap(
-        initialCameraPosition: CameraPosition(target: _pGooglePlex, zoom: 13),
+        initialCameraPosition: CameraPosition(target: _alexandria, zoom: 13),
+        markers: {
+          const Marker(
+              markerId: MarkerId("_currentLocation"),
+              icon: BitmapDescriptor.defaultMarker,
+              position: _alexandria),
+          const Marker(
+              markerId: MarkerId("_sourceLocation"),
+              icon: BitmapDescriptor.defaultMarker,
+              position: _mansoura),
+        },
       ),
     );
   }
