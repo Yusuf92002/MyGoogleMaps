@@ -1,6 +1,8 @@
 import 'dart:async';
-
+import 'dart:math';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_app/consts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -22,10 +24,20 @@ class _MapPageState extends State<MapPage> {
   static const LatLng _mansoura = LatLng(31.0419, 31.3785);
   LatLng? _currentP = null;
 
+  Map<PolylineId, Polyline> polylines = {};
+
   @override
   void initState() {
     super.initState();
-    getLocationUpdates();
+    getLocationUpdates().then(
+      (_) => {
+        getPolylinePoints().then(
+          (coordinates) => {
+            generatePolyLineFromPoints(coordinates),
+          },
+        ),
+      },
+    );
   }
 
   @override
@@ -54,6 +66,9 @@ class _MapPageState extends State<MapPage> {
                     icon: BitmapDescriptor.defaultMarker,
                     position: _mansoura),
               },
+              polylines: Set<Polyline>.of(
+                polylines.values,
+              ),
             ),
     );
   }
@@ -97,6 +112,42 @@ class _MapPageState extends State<MapPage> {
           _cameraToPostion(_currentP!);
         });
       }
+    });
+  }
+
+  Future<List<LatLng>> getPolylinePoints() async {
+    List<LatLng> polylineCoordinates = [];
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        googleApiKey: GOOGLE_MAPS_API_KEY,
+        request: PolylineRequest(
+          origin: PointLatLng(_alexandria.latitude, _alexandria.longitude),
+          destination: PointLatLng(_mansoura.latitude, _mansoura.longitude),
+          mode: TravelMode.driving,
+        ));
+    if (result.points.isNotEmpty) {
+      print('Error retrieving polyline points: ${result.errorMessage}');
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(
+          LatLng(point.latitude, point.longitude),
+        );
+      });
+    } else {
+      print('Error retrieving polyline points: ${result.errorMessage}');
+    }
+    return polylineCoordinates;
+  }
+
+  void generatePolyLineFromPoints(List<LatLng> polylineCoordinates) async {
+    PolylineId id = PolylineId('poly');
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.black,
+      points: polylineCoordinates,
+      width: 8,
+    );
+    setState(() {
+      polylines[id] = polyline;
     });
   }
 }
