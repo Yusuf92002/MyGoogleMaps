@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -11,6 +13,9 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   Location _locationController = new Location();
+
+  final Completer<GoogleMapController> _mapController =
+      Completer<GoogleMapController>();
 
   // Alexandria, Egypt
   static const LatLng _alexandria = LatLng(31.2156, 29.9553);
@@ -31,6 +36,8 @@ class _MapPageState extends State<MapPage> {
               child: Text('Loading...'),
             )
           : GoogleMap(
+              onMapCreated: ((GoogleMapController controller) =>
+                  _mapController.complete(controller)),
               initialCameraPosition:
                   const CameraPosition(target: _alexandria, zoom: 13),
               markers: {
@@ -48,6 +55,17 @@ class _MapPageState extends State<MapPage> {
                     position: _mansoura),
               },
             ),
+    );
+  }
+
+  Future<void> _cameraToPostion(LatLng pos) async {
+    final GoogleMapController controller = await _mapController.future;
+    CameraPosition _newCameraPosition = CameraPosition(
+      target: pos,
+      zoom: 13,
+    );
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(_newCameraPosition),
     );
   }
 
@@ -69,16 +87,16 @@ class _MapPageState extends State<MapPage> {
         return;
       }
     }
-    _locationController.onLocationChanged.listen((LocationData currentLocation) {
-   if (currentLocation.latitude != null &&
-       currentLocation.longitude != null) {
-     setState(() {
-       _currentP =
-           LatLng(currentLocation.latitude!, currentLocation.longitude!);
-       print(_currentP);  // Debugging print to check if _currentP is being updated
-     });
-   }
- });
-
+    _locationController.onLocationChanged
+        .listen((LocationData currentLocation) {
+      if (currentLocation.latitude != null &&
+          currentLocation.longitude != null) {
+        setState(() {
+          _currentP =
+              LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          _cameraToPostion(_currentP!);
+        });
+      }
+    });
   }
 }
